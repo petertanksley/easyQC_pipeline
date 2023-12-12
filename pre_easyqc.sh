@@ -9,7 +9,6 @@
 #SBATCH --mail-type=all   # Send email at begin and end of job
 #SBATCH --mail-user=peter.tanksley@austin.utexas.edu
 
-
 #========================================================================================#
 # SET WORKING ENVIRONMENT
 #========================================================================================#
