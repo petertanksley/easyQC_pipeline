@@ -199,6 +199,8 @@ AFR_SMOK_PUB_RAW="../input/AFR/SMOK/GSCAN_SmkInit_2022_GWAS_SUMMARY_STATS_AFR.tx
 AFR_SMOK_PUB_PRE="../temp/AFR/SMOK"
 mkdir -p "$AFR_SMOK_PUB_PRE"
 
+if [ ! -f "$AFR_SMOK_PUB_PRE/afr_smok_pub_PRE_EASYQC.txt" ]; then
+
 #prep file for liftOver (38->19)
 awk 'BEGIN {OFS="\t"} NR>1 {print $1, $2-1, $2, $0}' "$AFR_SMOK_PUB_RAW" > "$AFR_SMOK_PUB_PRE/afr_smok_pub_liftOver.bed"
 
@@ -218,9 +220,6 @@ awk 'BEGIN {OFS="\t"; print "CHR", "POS", "RSID", "EFFECT_ALLELE", "OTHER_ALLELE
 	{sub(/^chr/, "", $1); print $1, $3, $6, $7, $8, $9, $10, $11, $12, $13}' \
 	"$AFR_SMOK_PUB_PRE/afr_smok_pub_hg19.bed" > "$AFR_SMOK_PUB_PRE/afr_smok_pub_hg19.txt"
 
-
-
-#if [ ! -f "$AFR_SMOK_PUB_PRE/afr_smok_pub_PRE_EASYQC.txt" ]; then
 
 # REMOVE NON-SNPs, SNPS NOT INCLUDED IN GWAS, AND X-CHR ##
 awk -F"\t" 'NR==1 {print} NR>1 && ($4 != "D" && $4 != "I") &&
@@ -245,7 +244,7 @@ awk -F"\t" '{if(NR == 1) {print "ChrPosID", "Chr", "rsID", "position", "coded_al
         else {print $1":"$2, $1, $3, $2, $4, $5, "NA", exp($7), $7, $8, $7/$8, $9, $10, "23491.39", "NA", "0"}}' OFS="\t" \
         "$AFR_SMOK_PUB_PRE/afr_smok_pub_hg19_rsid_snps.txt" > "$AFR_SMOK_PUB_PRE/afr_smok_pub_PRE_EASYQC.txt"
 
-#fi
+fi
 
 
 
@@ -424,15 +423,34 @@ mkdir -p "$EUR_SMOK_PUB_PRE"
 
 if [ ! -f "$EUR_SMOK_PUB_PRE/eur_smok_pub_PRE_EASYQC.txt" ]; then
 
+#prep file for liftOver (38->19)
+awk 'BEGIN {OFS="\t"} NR>1 {print $1, $2-1, $2, $0}' "$EUR_SMOK_PUB_RAW" > "$EUR_SMOK_PUB_PRE/eur_smok_pub_liftOver.bed"
+
+#liftOver to HG19
+liftOver -bedPlus=3 \
+        -tab \
+	"$EUR_SMOK_PUB_PRE/eur_smok_pub_liftOver.bed" \
+        "$CHAIN_38to19" \
+        "$EUR_SMOK_PUB_PRE/eur_smok_pub_hg19.bed" \
+        "$EUR_SMOK_PUB_PRE/eur_smok_pub_unmapped38.bed"
+
+#head -n2 ../temp/AFR/SMOK/afr_smok_pub_hg19.bed
+#chr10  101759978       101759979       chr10   100000222       rs138880521     A       G       0.0189107       -0.0355 0.03    0.237594    $
+#chr10  101759991       101759992       chr10   100000235       rs11596870      T       C       0.30938 0.00543 0.01    0.582511        24278
+
+awk 'BEGIN {OFS="\t"; print "CHR", "POS", "RSID", "EFFECT_ALLELE", "OTHER_ALLELE", "AF_1000G", "BETA", "SE", "P", "N"} \
+        {sub(/^chr/, "", $1); print $1, $3, $6, $7, $8, $9, $10, $11, $12, $13}' \
+        "EUR_SMOK_PUB_PRE/eur_smok_pub_hg19.bed" > "$EUR_SMOK_PUB_PRE/eur_smok_pub_hg19.txt"
+
 #Fix imputation field (currently, all rows show imputation)
 awk 'BEGIN {FS=OFS="\t"} NR > 1 {$1 = substr($1, 4)} 1' \
-        "$EUR_SMOK_PUB_RAW" > "$EUR_SMOK_PUB_PRE/eur_smok_pub_chrfix.txt"
+        "$EUR_SMOK_PUB_PRE/eur_smok_pub_hg19.txt" > "$EUR_SMOK_PUB_PRE/eur_smok_pub_hg19_chrfix.txt"
 
 # REMOVE NON-SNPs, SNPS NOT INCLUDED IN GWAS, AND X-CHR ##
 awk -F"\t" 'NR==1 {print} NR>1 && ($4 != "D" && $4 != "I") &&
         substr($3, 1, 2) == "rs" && ($9 != "" && $9 != "NA") &&
         ($2 != "X") {print}' OFS="\t" \
-        "$EUR_SMOK_PUB_PRE/eur_smok_pub_chrfix.txt" > "$EUR_SMOK_PUB_PRE/eur_smok_pub_chrfix_rsid_snps.txt"
+        "$EUR_SMOK_PUB_PRE/eur_smok_pub_hg19_chrfix.txt" > "$EUR_SMOK_PUB_PRE/eur_smok_pub_hg19_chrfix_rsid_snps.txt"
 
 #NOTES
 #combine chr and pos to form ChrPosID
@@ -449,6 +467,6 @@ awk -F"\t" 'NR==1 {print} NR>1 && ($4 != "D" && $4 != "I") &&
 awk -F"\t" '{if(NR == 1) {print "ChrPosID", "Chr", "rsID", "position", "coded_all", "noncoded_all",
 	"oevar_imp", "OR", "Beta", "SE", "Z", "Pval", "N", "Neff", "HWE_pval", "imputed"} \
         else {print $1":"$2, $1, $3, $2, $4, $5, "NA", exp($7), $7, $8, $7/$8, $9, $10, "23491.39", "NA", "0"}}' OFS="\t" \
-        "$EUR_SMOK_PUB_PRE/eur_smok_pub_rsid_snps.txt" > "$EUR_SMOK_PUB_PRE/eur_smok_pub_PRE_EASYQC.txt"
+        "$EUR_SMOK_PUB_PRE/eur_smok_pub_hg19_rsid_snps.txt" > "$EUR_SMOK_PUB_PRE/eur_smok_pub_PRE_EASYQC.txt"
 
 fi

@@ -1,0 +1,8 @@
+#files to ignore
+code.Rproj
+ttp_pgs*
+easyqc*
+git_token.txt
+..temp/
+.Rhistory
+.Rproj.user/
