@@ -1,6 +1,6 @@
 #files to ignore
 code.Rproj
-ttp_pgs*
+tt_pgs*
 easyqc*
 git_token.txt
 ..temp/
