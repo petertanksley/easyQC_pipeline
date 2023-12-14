@@ -264,11 +264,17 @@ mkdir -p "$EUR_ADHD_PRE"
 
 if [ ! -f "$EUR_ADHD_PRE/eur_adhd_PRE_EASYQC.txt" ]; then
 
-# REMOVE NON-SNPs, SNPS NOT INCLUDED IN GWAS, AND X-CHR ##
-awk -F'[[:space:]]' 'BEGIN {OFS="\t"} NR==1 {print} NR>1 && ($4 != "D" && $4 != "I") && \
-    substr($2, 1, 2) == "rs" && ($11 != "" && $11 != "NA") && \
-    ($1 != "X") {print}' "$EUR_ADHD_RAW" > "$EUR_ADHD_PRE/eur_adhd_rsid_snps.txt"
+#change delimiter from space to tab
+cat "$EUR_ADHD_RAW" | tr ' ' '\t' > "$EUR_ADHD_PRE/eur_adhd_tab.txt"
 
+# REMOVE NON-SNPs, SNPS NOT INCLUDED IN GWAS, AND X-CHR ##
+awk -F'\t' 'BEGIN {OFS="\t"} NR==1 {print} NR>1 && ($4 != "D" && $4 != "I") && \
+    substr($2, 1, 2) == "rs" && ($11 != "" && $11 != "NA") && \
+    ($1 != "X") {print}' "$EUR_ADHD_PRE/eur_adhd_tab.txt" > "$EUR_ADHD_PRE/eur_adhd_tab_rsid_snps.txt"
+
+#head -n2 ../temp/EUR/ADHD/eur_adhd_tab_rsid_snps.txt
+#CHR	SNP	BP	A1	A2	FRQ_A_38691	FRQ_U_186843	INFO	OR	SE	P	Direction	Nca	Nco
+#8	rs62513865	101592213	C	T	0.925	0.937	0.981	0.99631	0.0175	0.8325	+---+++0-++-+	38691	186843
 
 #NOTES
 #combine chr and pos to form ChrPosID
@@ -281,12 +287,10 @@ awk -F'[[:space:]]' 'BEGIN {OFS="\t"} NR==1 {print} NR>1 && ($4 != "D" && $4 != 
 #=SAMP_PREV: 38691/(38691+186843)=.17
 #=Neff=4*.17*(1-.17)*(225534)=127291.39
 
-awk -F"\t" 'BEGIN {print "ChrPosID", "Chr", "rsID", "position", "coded_all", "noncoded_all",
-	"oevar_imp", "OR", "Beta", "SE", "Z", "Pval", "N", "Neff", "HWE_pval", "imputed"} \
-	NR > 1 {Beta=log($9); \
-	Z=($10 != 0) ? log($9)/$10 : "NA"; \
-	print $1 ":" $3, $1, $2, $3, $4, $5, $8, $9, Beta, $10, Z, $11, "225534", "127291.39", "NA", "1"}' \
-	"$EUR_ADHD_PRE/eur_adhd_rsid_snps.txt" > "$EUR_ADHD_PRE/eur_adhd_PRE_EASYQC.txt"
+awk -F"\t" 'BEGIN {OFS="\t"} NR==1 {print "ChrPosID", "Chr", "rsID", "position", "coded_all", "noncoded_all",
+	"oevar_imp", "OR", "Beta", "SE","Z","Pval", "N", "Neff", "HWE_pval", "imputed"}
+	NR>1 {print $1 ":" $3, $1, $2, $3, $4, $5, $8, $9, log($9), $10,log($9)/$10,$11, "225534", "127291.39", "NA", "1"}' \
+	"$EUR_ADHD_PRE/eur_adhd_tab_rsid_snps.txt" > "$EUR_ADHD_PRE/eur_adhd_PRE_EASYQC.txt"
 fi
 
 #========================================ALCP (Zhou et al., 2023)
@@ -434,23 +438,19 @@ liftOver -bedPlus=3 \
         "$EUR_SMOK_PUB_PRE/eur_smok_pub_hg19.bed" \
         "$EUR_SMOK_PUB_PRE/eur_smok_pub_unmapped38.bed"
 
-#head -n2 ../temp/AFR/SMOK/afr_smok_pub_hg19.bed
-#chr10  101759978       101759979       chr10   100000222       rs138880521     A       G       0.0189107       -0.0355 0.03    0.237594    $
-#chr10  101759991       101759992       chr10   100000235       rs11596870      T       C       0.30938 0.00543 0.01    0.582511        24278
+#head -n2 ../temp/EUR/SMOK/eur_smok_pub_hg19.bed
+#chr10	101759991	101759992	chr10	100000235	rs11596870	T	C	0.314115	-0.000605	0.003	0.811963	357235
+#chr10	101760699	101760700	chr10	100000943	rs11190359	A	G	0.0994036	-0.0034	0.004	0.385971	357235
 
 awk 'BEGIN {OFS="\t"; print "CHR", "POS", "RSID", "EFFECT_ALLELE", "OTHER_ALLELE", "AF_1000G", "BETA", "SE", "P", "N"} \
-        {sub(/^chr/, "", $1); print $1, $3, $6, $7, $8, $9, $10, $11, $12, $13}' \
-        "EUR_SMOK_PUB_PRE/eur_smok_pub_hg19.bed" > "$EUR_SMOK_PUB_PRE/eur_smok_pub_hg19.txt"
-
-#Fix imputation field (currently, all rows show imputation)
-awk 'BEGIN {FS=OFS="\t"} NR > 1 {$1 = substr($1, 4)} 1' \
-        "$EUR_SMOK_PUB_PRE/eur_smok_pub_hg19.txt" > "$EUR_SMOK_PUB_PRE/eur_smok_pub_hg19_chrfix.txt"
+	{sub(/^chr/, "", $1); print $1, $3, $6, $7, $8, $9, $10, $11, $12, $13}' \
+	"$EUR_SMOK_PUB_PRE/eur_smok_pub_hg19.bed" > "$EUR_SMOK_PUB_PRE/eur_smok_pub_hg19.txt"
 
 # REMOVE NON-SNPs, SNPS NOT INCLUDED IN GWAS, AND X-CHR ##
 awk -F"\t" 'NR==1 {print} NR>1 && ($4 != "D" && $4 != "I") &&
-        substr($3, 1, 2) == "rs" && ($9 != "" && $9 != "NA") &&
-        ($2 != "X") {print}' OFS="\t" \
-        "$EUR_SMOK_PUB_PRE/eur_smok_pub_hg19_chrfix.txt" > "$EUR_SMOK_PUB_PRE/eur_smok_pub_hg19_chrfix_rsid_snps.txt"
+	substr($3, 1, 2) == "rs" && ($9 != "" && $9 != "NA") &&
+	($2 != "X") {print}' OFS="\t" \
+	"$EUR_SMOK_PUB_PRE/eur_smok_pub_hg19.txt" > "$EUR_SMOK_PUB_PRE/eur_smok_pub_hg19_rsid_snps.txt"
 
 #NOTES
 #combine chr and pos to form ChrPosID
@@ -466,7 +466,6 @@ awk -F"\t" 'NR==1 {print} NR>1 && ($4 != "D" && $4 != "I") &&
 
 awk -F"\t" '{if(NR == 1) {print "ChrPosID", "Chr", "rsID", "position", "coded_all", "noncoded_all",
 	"oevar_imp", "OR", "Beta", "SE", "Z", "Pval", "N", "Neff", "HWE_pval", "imputed"} \
-        else {print $1":"$2, $1, $3, $2, $4, $5, "NA", exp($7), $7, $8, $7/$8, $9, $10, "23491.39", "NA", "0"}}' OFS="\t" \
-        "$EUR_SMOK_PUB_PRE/eur_smok_pub_hg19_rsid_snps.txt" > "$EUR_SMOK_PUB_PRE/eur_smok_pub_PRE_EASYQC.txt"
-
+	else {print $1":"$2, $1, $3, $2, $4, $5, "NA", exp($7), $7, $8, $7/$8, $9, $10, "23491.39", "NA", "0"}}' OFS="\t" \
+	"$EUR_SMOK_PUB_PRE/eur_smok_pub_hg19_rsid_snps.txt" > "$EUR_SMOK_PUB_PRE/eur_smok_pub_PRE_EASYQC.txt"
 fi
