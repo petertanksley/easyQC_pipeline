@@ -29,11 +29,11 @@ TEMP_REF="../temp/ref"
 mkdir -p $TEMP_REF
 
 #set MAF thesholds
-AFR_MAF="0.005"
-AFR_MAF_NAME="maf005"
+AFR_MAF="0.001"
+AFR_MAF_NAME="maf001"
 
-EUR_MAF="$AFR_MAF"
-EUR_MAF_NAME="$AFR_MAF_NAME"
+EUR_MAF="0.005"
+EUR_MAF_NAME="maf005"
 
 #=AFR REF PANEL==========================================================================#
 

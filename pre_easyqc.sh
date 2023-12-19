@@ -62,46 +62,6 @@ fi
 
 #=======================================CUD (Johnson et al., 2020)
 
-#head -n2 ../input/AFR/CUD/CUD_AFR_full_public_11.14.2020
-#CHR SNP BP A1 A2 Z P N_CAS N_CON N
-#1 rs111906919 16160196 T C 0.532 0.5944 2505 3751 6256
-
-#1 CHR
-#2 SNP
-#3 BP
-#4 A1
-#5 A2
-#6 Z
-#7 P
-#8 N_CAS
-#9 N_CON
-#10 N
-
-#AFR_CUD_RAW="../input/AFR/CUD/CUD_AFR_full_public_11.14.2020"
-#AFR_CUD_PRE="..temp/AFR/CUD"
-#mkdir -p $AFR_CUD_PRE
-
-## REMOVE NON-SNPs, SNPS NOT INCLUDED IN GWAS, AND X-CHR ##
-#awk -F"\t" 'NR==1 {print} NR>1 && ($4 != "D" && $4 != "I") &&
-#        substr($2, 1, 2) == "rs" && ($7 != "" && $7 != "NA") &&
-#        ($1 != "X") {print}' OFS="\t" \
-#        $AFR_CUD_RAW > $AFR_CUD_PRE/afr_cud_rsid.snps.txt
-
-#NOTES
-#combine chr and pos to form ChrPosID
-#set oever_imp (INFO) to "NA"
-#Calculate beta from Z: Z/sqrt((2MAF)*(1-MAF)*(N+Z^2))
-#Calculate se from beta and Z: se=beta/Z
-#exponentiate beta to get OR
-#calculate Neff: SAMP_PREV=N_CAS/(N_CAS+N_CON); Neff=4*SAMP_PREV*(1-SAMP_PREV)*(N_CAS+N_CON)
-#set HWE_pval to "NA" (no data)
-#set imputed to "0" (default to assuming no imputation)
-
-#awk -F"\t" '{if(NR == 1) {print "ChrPosID", "Chr", "rsID", "position", "coded_all", "noncoded_all",
-#	"oevar_imp", "OR", "Beta", "SE", "Z", "Pval", "N", "Neff", "HWE_pval", "imputed"}
-#	else if {print $1":"$3, $1, $2, $3, $4, $5, "NA", exp($9), $9, $10, $9/$10, $11, "122571", $8, "NA", 1}}' OFS="\t" \
-#	$AFR_CUD_RAW > $AFR_CUD_PRE/afr_cud_PRE_EASYQC.txt
-
 
 #====================================SMOK (Saunders et al., 2022)
 #1-23andMe (females)
@@ -143,8 +103,8 @@ awk -F"\t" 'NR==1 {print} NR>1 && ($6 != "D" && $6 != "I") &&
 #=Neff=4*.23*(1-.23)*(54757)=38789.86
 
 awk -F"\t" '{if(NR == 1) {print "ChrPosID", "Chr", "rsID", "position", "coded_all", "noncoded_all",
-	"oevar_imp", "OR", "Beta", "SE", "Z", "Pval", "N", "Neff", "HWE_pval", "imputed"} \
-	else {print $2":"$3, $2, $1, $3, $5, $6, "NA", exp($8), $8, $9, $8/$9, $10, $11, "38789.86", $14, $12}}' OFS="\t" \
+	"AF_coded_all", "oevar_imp", "OR", "Beta", "SE", "Z", "Pval", "N", "Neff", "HWE_pval", "imputed"} \
+	else {print $2":"$3, $2, $1, $3, $5, $6, $7, "NA", exp($8), $8, $9, $8/$9, $10, $11, "38789.86", $14, $12}}' OFS="\t" \
 	"$AFR_SMOK_23F_PRE/afr_smok_23f_impfix_rsid_snps.txt" > "$AFR_SMOK_23F_PRE/afr_smok_23f_PRE_EASYQC.txt"
 
 fi
@@ -184,8 +144,8 @@ awk -F"\t" 'NR==1 {print} NR>1 && ($6 != "D" && $6 != "I") &&
 #=Neff=4*.29*(1-.29)*(40554)=33400.27
 
 awk -F"\t" '{if(NR == 1) {print "ChrPosID", "Chr", "rsID", "position", "coded_all", "noncoded_all",
-	"oevar_imp", "OR", "Beta", "SE", "Z", "Pval", "N", "Neff", "HWE_pval", "imputed"} \
-        else {print $2":"$3, $2, $1, $3, $5, $6, "NA", exp($8), $8, $9, $8/$9, $10, $11, "33400.27", $14, $12}}' OFS="\t" \
+	"AF_coded_all", "oevar_imp", "OR", "Beta", "SE", "Z", "Pval", "N", "Neff", "HWE_pval", "imputed"} \
+        else {print $2":"$3, $2, $1, $3, $5, $6, $7, "NA", exp($8), $8, $9, $8/$9, $10, $11, "33400.27", $14, $12}}' OFS="\t" \
         "$AFR_SMOK_23M_PRE/afr_smok_23m_impfix_rsid_snps.txt" > "$AFR_SMOK_23M_PRE/afr_smok_23m_PRE_EASYQC.txt"
 fi
 
@@ -216,10 +176,10 @@ liftOver -bedPlus=3 \
 #chr10	101759978	101759979	chr10	100000222	rs138880521	A	G	0.0189107	-0.0355	0.03	0.237594	24278
 #chr10	101759991	101759992	chr10	100000235	rs11596870	T	C	0.30938	0.00543	0.01	0.582511	24278
 
+#remove extra columns (2&4) and remove "chr" prefix from column
 awk 'BEGIN {OFS="\t"; print "CHR", "POS", "RSID", "EFFECT_ALLELE", "OTHER_ALLELE", "AF_1000G", "BETA", "SE", "P", "N"} \
 	{sub(/^chr/, "", $1); print $1, $3, $6, $7, $8, $9, $10, $11, $12, $13}' \
 	"$AFR_SMOK_PUB_PRE/afr_smok_pub_hg19.bed" > "$AFR_SMOK_PUB_PRE/afr_smok_pub_hg19.txt"
-
 
 # REMOVE NON-SNPs, SNPS NOT INCLUDED IN GWAS, AND X-CHR ##
 awk -F"\t" 'NR==1 {print} NR>1 && ($4 != "D" && $4 != "I") &&
@@ -227,22 +187,39 @@ awk -F"\t" 'NR==1 {print} NR>1 && ($4 != "D" && $4 != "I") &&
         ($2 != "X") {print}' OFS="\t" \
         "$AFR_SMOK_PUB_PRE/afr_smok_pub_hg19.txt" > "$AFR_SMOK_PUB_PRE/afr_smok_pub_hg19_rsid_snps.txt"
 
+#ATTACH AF AND ALT ALLELE FROM REF PANEL
+awk -v OFS='\t' 'NR==FNR{a[$3]=$6 "\t" $7;next} FNR==1{print $0, "ALT", "AF_ALT_AFR_1000G"; next} $3 in a{print $0, a[$3];}' \
+    ../temp/ref/1KG_AFR_AF_maf001.txt "$AFR_SMOK_PUB_PRE/afr_smok_pub_hg19_rsid_snps.txt" \
+    > "$AFR_SMOK_PUB_PRE/afr_smok_pub_hg19_rsid_snps_af.txt"
+
+# ALIGN AF_coded_all FROM THE ATTACHED COLUMNS ##
+awk -F"\t" 'BEGIN {OFS="\t"} {
+    if (NR==1) {
+        print $0, "AF_coded_all"
+    } else if (NR > 1 && $4 == $11) {
+        print $0, $12
+    } else if (NR > 1 && $5 == $11) {
+        print $0, 1 - $12
+    }
+}' "$AFR_SMOK_PUB_PRE/afr_smok_pub_hg19_rsid_snps_af.txt" > "$AFR_SMOK_PUB_PRE/afr_smok_pub_hg19_rsid_snps_af_aligned.txt"
+
+#head -n2 ../temp/AFR/SMOK/afr_smok_pub_hg19_rsid_snps_af_aligned.txt
+#CHR	POS	RSID	EFFECT_ALLELE	OTHER_ALLELE	AF_1000G	BETA	SE	P	N	ALT	AF_ALT_AFR_1000G	AF_coded_all
+#10	101759979	rs138880521	A	G	0.0189107	-0.0355	0.03	0.237594	24278	A 0.0192012
+
 #NOTES
 #combine chr and pos to form ChrPosID
 #set oever_imp (INFO) to "NA"
 #Calculate se from beta and Z: se=beta/Z
 #exponentiate beta to get OR
 #
-#Calculate Neff (prev reported in paper):
-#=N_CAS: 24278*.41=9915.72
-#=N_CON: 24278-9915.72=14362.28
-#=SAMP_PREV: 9915.72/24278=.41
-#=Neff=4*.41*(1-.41)*(24278)=23491.39
+#Calculate Neff as sum of effective sample size (cohort-specific prev reported in supp)
+#Neff==22109.62
 
 awk -F"\t" '{if(NR == 1) {print "ChrPosID", "Chr", "rsID", "position", "coded_all", "noncoded_all",
-	"oevar_imp", "OR", "Beta", "SE", "Z", "Pval", "N", "Neff", "HWE_pval", "imputed"} \
-        else {print $1":"$2, $1, $3, $2, $4, $5, "NA", exp($7), $7, $8, $7/$8, $9, $10, "23491.39", "NA", "0"}}' OFS="\t" \
-        "$AFR_SMOK_PUB_PRE/afr_smok_pub_hg19_rsid_snps.txt" > "$AFR_SMOK_PUB_PRE/afr_smok_pub_PRE_EASYQC.txt"
+	"AF_coded_all", "oevar_imp", "OR", "Beta", "SE", "Z", "Pval", "N", "Neff", "HWE_pval", "imputed"} \
+        else {print $1":"$2, $1, $3, $2, $4, $5, $13, "NA", exp($7), $7, $8, $7/$8, $9, $10, "22109.62", "NA", "0"}}' OFS="\t" \
+        "$AFR_SMOK_PUB_PRE/afr_smok_pub_hg19_rsid_snps_af_aligned.txt" > "$AFR_SMOK_PUB_PRE/afr_smok_pub_PRE_EASYQC.txt"
 
 fi
 
@@ -272,6 +249,26 @@ awk -F'\t' 'BEGIN {OFS="\t"} NR==1 {print} NR>1 && ($4 != "D" && $4 != "I") && \
     substr($2, 1, 2) == "rs" && ($11 != "" && $11 != "NA") && \
     ($1 != "X") {print}' "$EUR_ADHD_PRE/eur_adhd_tab.txt" > "$EUR_ADHD_PRE/eur_adhd_tab_rsid_snps.txt"
 
+#head -n2 ../temp/ref/1KG_EUR_AF_maf005.txt
+#ChrPosID	Chr	RSID	Pos	REF	ALT	AF_ALT_EUR_1000G
+#1:11008	1	rs575272151	11008	C	G	0.0884692
+
+#ATTACH AF AND ALT ALLELE FROM REF PANEL
+awk -v OFS='\t' 'NR==FNR{a[$3]=$6 "\t" $7;next} FNR==1{print $0, "ALT", "AF_ALT_AFR_1000G"; next} $2 in a{print $0, a[$2];}' \
+    ../temp/ref/1KG_EUR_AF_maf005.txt "$EUR_ADHD_PRE/eur_adhd_tab_rsid_snps.txt" \
+    > "$EUR_ADHD_PRE/eur_adhd_tab_rsid_snps_af.txt"
+
+# ALIGN AF_coded_all FROM THE ATTACHED COLUMNS ##
+awk -F"\t" 'BEGIN {OFS="\t"} {
+    if (NR==1) {
+        print $0, "AF_coded_all"
+    } else if (NR > 1 && $4 == $15) {
+        print $0, $16
+    } else if (NR > 1 && $5 == $15) {
+        print $0, 1 - $16
+    }
+}' "$EUR_ADHD_PRE/eur_adhd_tab_rsid_snps_af.txt" > "$EUR_ADHD_PRE/eur_adhd_tab_rsid_snps_af_aligned.txt"
+
 #head -n2 ../temp/EUR/ADHD/eur_adhd_tab_rsid_snps.txt
 #CHR	SNP	BP	A1	A2	FRQ_A_38691	FRQ_U_186843	INFO	OR	SE	P	Direction	Nca	Nco
 #8	rs62513865	101592213	C	T	0.925	0.937	0.981	0.99631	0.0175	0.8325	+---+++0-++-+	38691	186843
@@ -281,16 +278,14 @@ awk -F'\t' 'BEGIN {OFS="\t"} NR==1 {print} NR>1 && ($4 != "D" && $4 != "I") && \
 #Calculate Z: Z=log(OR)/se
 #get beta from log(OR)
 #
-#Calculate Neff (prev reported in paper):
-#=N_CAS: 38691
-#=N_CON: 186843
-#=SAMP_PREV: 38691/(38691+186843)=.17
-#=Neff=4*.17*(1-.17)*(225534)=127291.39
+#Calculate Neff as sum of effective sample size (cohort-specific prev reported in supp):
+#Neff==103135.53
+
 
 awk -F"\t" 'BEGIN {OFS="\t"} NR==1 {print "ChrPosID", "Chr", "rsID", "position", "coded_all", "noncoded_all",
-	"oevar_imp", "OR", "Beta", "SE","Z","Pval", "N", "Neff", "HWE_pval", "imputed"}
-	NR>1 {print $1 ":" $3, $1, $2, $3, $4, $5, $8, $9, log($9), $10,log($9)/$10,$11, "225534", "127291.39", "NA", "1"}' \
-	"$EUR_ADHD_PRE/eur_adhd_tab_rsid_snps.txt" > "$EUR_ADHD_PRE/eur_adhd_PRE_EASYQC.txt"
+	"AF_coded_all", "oevar_imp", "OR", "Beta", "SE","Z","Pval", "N", "Neff", "HWE_pval", "imputed"}
+	NR>1 {print $1 ":" $3, $1, $2, $3, $4, $5, $17, $8, $9, log($9), $10,log($9)/$10,$11, "225534", "103135.53", "NA", "1"}' \
+	"$EUR_ADHD_PRE/eur_adhd_tab_rsid_snps_af_aligned.txt" > "$EUR_ADHD_PRE/eur_adhd_PRE_EASYQC.txt"
 fi
 
 #========================================ALCP (Zhou et al., 2023)
@@ -317,14 +312,14 @@ awk -F"\t" 'NR==1 {print} NR>1 && ($4 != "D" && $4 != "I") && \
 #set oever_imp (INFO) to "NA"
 #exponentiate beta to get OR
 #divide beta by SE to get Z
-#set N to "122571" (max sample size)
+#set N to "359398.05" (max sample size)
 #set HWE_pval to "NA" (no data)
 #set imputed to "0" (default to assuming no imputation)
 
 ## ADD FINAL HEADERS AND MAKE ADJUSTMENTS TO FIT STRUCTURE ##
 awk -F"\t" '{if(NR == 1) {print "ChrPosID", "Chr", "rsID", "position", "coded_all", "noncoded_all", \
-	"oevar_imp", "OR", "Beta", "SE", "Z", "Pval", "N", "Neff", "HWE_pval", "imputed"} \
-	else {print $2":"$3, $2, $1, $3, $4, $5, $7, "NA", exp($9), $9, $10, $9/$10, $11, "122571", $8, "NA", 0}}' OFS="\t" \
+	"AF_coded_all", "oevar_imp", "OR", "Beta", "SE", "Z", "Pval", "N", "Neff", "HWE_pval", "imputed"} \
+	else {print $2":"$3, $2, $1, $3, $4, $5, $7, "NA", exp($9), $9, $10, $9/$10, $11, "903147", "359398.05", "NA", 0}}' OFS="\t" \
 	"$EUR_ALCP_PRE/eur_alcp_rsid_snps.txt" > "$EUR_ALCP_PRE/eur_alcp_PRE_EASYQC.txt"
 fi
 
@@ -371,8 +366,8 @@ awk -F"\t" 'NR==1 {print} NR>1 && ($6 != "D" && $6 != "I") &&
 #=Neff=4*.41*(1-.41)*(997356)=965041.67
 
 awk -F"\t" '{if(NR == 1) {print "ChrPosID", "Chr", "rsID", "position", "coded_all", "noncoded_all",
-	"oevar_imp", "OR", "Beta", "SE", "Z", "Pval", "N", "Neff", "HWE_pval", "imputed"} \
-        else {print $2":"$3, $2, $1, $3, $5, $6, "NA", exp($8), $8, $9, $8/$9, $10, $11, "965041.67", $14, $12}}' OFS="\t" \
+	"AF_coded_all", "oevar_imp", "OR", "Beta", "SE", "Z", "Pval", "N", "Neff", "HWE_pval", "imputed"} \
+        else {print $2":"$3, $2, $1, $3, $5, $6, $7, "NA", exp($8), $8, $9, $8/$9, $10, $11, "965041.67", $14, $12}}' OFS="\t" \
         "$EUR_SMOK_23F_PRE/eur_smok_23f_impfix_rsid_snps.txt" > "$EUR_SMOK_23F_PRE/eur_smok_23f_PRE_EASYQC.txt"
 
 fi
@@ -409,8 +404,8 @@ awk -F"\t" 'NR==1 {print} NR>1 && ($6 != "D" && $6 != "I") &&
 #=Neff=4*.43*(1-.43)*(866242)=849263.66
 
 awk -F"\t" '{if(NR == 1) {print "ChrPosID", "Chr", "rsID", "position", "coded_all", "noncoded_all",
-	"oevar_imp", "OR", "Beta", "SE", "Z", "Pval", "N", "Neff", "HWE_pval", "imputed"} \
-        else {print $2":"$3, $2, $1, $3, $5, $6, "NA", exp($8), $8, $9, $8/$9, $10, $11, "849263.66", $14, $12}}' OFS="\t" \
+	"AF_coded_all", "oevar_imp", "OR", "Beta", "SE", "Z", "Pval", "N", "Neff", "HWE_pval", "imputed"} \
+        else {print $2":"$3, $2, $1, $3, $5, $6, $7, "NA", exp($8), $8, $9, $8/$9, $10, $11, "849263.66", $14, $12}}' OFS="\t" \
         "$EUR_SMOK_23M_PRE/eur_smok_23m_impfix_rsid_snps.txt" > "$EUR_SMOK_23M_PRE/eur_smok_23m_PRE_EASYQC.txt"
 
 fi
@@ -452,20 +447,34 @@ awk -F"\t" 'NR==1 {print} NR>1 && ($4 != "D" && $4 != "I") &&
 	($2 != "X") {print}' OFS="\t" \
 	"$EUR_SMOK_PUB_PRE/eur_smok_pub_hg19.txt" > "$EUR_SMOK_PUB_PRE/eur_smok_pub_hg19_rsid_snps.txt"
 
+# ATTACH AF AND ALT ALLELE FROM REF PANEL
+awk -v OFS='\t' 'NR==FNR{a[$3]=$6 "\t" $7;next} FNR==1{print $0, "ALT", "AF_ALT_EUR_1000G"; next} $3 in a{print $0, a[$3];}' \
+    ../temp/ref/1KG_EUR_AF_maf005.txt "$EUR_SMOK_PUB_PRE/eur_smok_pub_hg19_rsid_snps.txt" \
+    > "$EUR_SMOK_PUB_PRE/eur_smok_pub_hg19_rsid_snps_af.txt"
+
+# ALIGN AF_coded_all FROM THE ATTACHED COLUMNS ##
+awk -F"\t" 'BEGIN {OFS="\t"} {
+    if (NR==1) {
+        print $0, "AF_coded_all"
+    } else if (NR > 1 && $4 == $11) {
+        print $0, $12
+    } else if (NR > 1 && $5 == $11) {
+        print $0, 1 - $12
+    }
+}' "$EUR_SMOK_PUB_PRE/eur_smok_pub_hg19_rsid_snps_af.txt" > "$EUR_SMOK_PUB_PRE/eur_smok_pub_hg19_rsid_snps_af_aligned.txt"
+
 #NOTES
 #combine chr and pos to form ChrPosID
 #set oever_imp (INFO) to "NA"
 #Calculate se from beta and Z: se=beta/Z
 #exponentiate beta to get OR
 #
-#Calculate Neff (prev reported in paper):
-#=N_CAS: 24278*.41=9915.72
-#=N_CON: 24278-9915.72=14362.28
-#=SAMP_PREV: 9915.72/24278=.41
-#=Neff=4*.41*(1-.41)*(24278)=23491.39
+#Calculate Neff sum of effective sample sizes (reported in supp)
+#=Neff=4*sample_prev*(1-sample_prev)*(sample_total)=783473.64
 
 awk -F"\t" '{if(NR == 1) {print "ChrPosID", "Chr", "rsID", "position", "coded_all", "noncoded_all",
-	"oevar_imp", "OR", "Beta", "SE", "Z", "Pval", "N", "Neff", "HWE_pval", "imputed"} \
-	else {print $1":"$2, $1, $3, $2, $4, $5, "NA", exp($7), $7, $8, $7/$8, $9, $10, "23491.39", "NA", "0"}}' OFS="\t" \
-	"$EUR_SMOK_PUB_PRE/eur_smok_pub_hg19_rsid_snps.txt" > "$EUR_SMOK_PUB_PRE/eur_smok_pub_PRE_EASYQC.txt"
+        "AF_coded_all", "oevar_imp", "OR", "Beta", "SE", "Z", "Pval", "N", "Neff", "HWE_pval", "imputed"} \
+        else {print $1":"$2, $1, $3, $2, $4, $5, $13, "NA", exp($7), $7, $8, $7/$8, $9, $10, "783473.64", "NA", "0"}}' OFS="\t" \
+        "$EUR_SMOK_PUB_PRE/eur_smok_pub_hg19_rsid_snps_af_aligned.txt" > "$EUR_SMOK_PUB_PRE/eur_smok_pub_PRE_EASYQC.txt"
+
 fi
