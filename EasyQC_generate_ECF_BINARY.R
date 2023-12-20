@@ -1,7 +1,7 @@
 
-#================================================================================================#
-# This script create .ecf files for the software EasyQC. This script is for: BINARY TRAITS 
-#================================================================================================#
+#=============================================================================#
+# This script create .ecf files for the software EasyQC. (BINARY TRAITS ONLY) 
+#=============================================================================#
 
 #=====SETUP====================================================================
 
@@ -10,39 +10,53 @@ library(pacman)
 p_load(glue,
        rio)
 
+#=EDIT THESE STRINGS===========================================================
+ANCEST      <- "EUR" #ALL CAPS
+PHENO       <- "ADHD" #ALL CAPS
+VERSION     <- "" #Specific version (if multiple versions exist)
+MAF         <- "005" #MAF filter level ("001" for AFR; "005" for EUR)
+
+#=DO NOT EDIT THESE============================================================
 
 #===INPUT - Sumstats
-FILE_IN        <- "../temp/AFR/ALCP/afr_alcp_PRE_EASYQC.txt" #Pathname of file
-FILE_NAME      <- "afr_alcp" #(nick)Name of file
+#conditional statement for file nickname
+if (VERSION != "") {
+  FILE_NAME <- tolower(glue("{ANCEST}_{PHENO}_{VERSION}"))
+} else {
+  FILE_NAME <- tolower(glue("{ANCEST}_{PHENO}"))
+}
+
+FILE_IN     <- glue("../temp/{ANCEST}/{PHENO}/{FILE_NAME}_PRE_EASYQC.txt") #Pathname of file
+
 COLS_IN    <- paste(c("rsID","coded_all","noncoded_all","Chr","position",
                       "N","Beta","SE","Pval","AF_coded_all", 
                       "imputed","oevar_imp","HWE_pval", "OR", "Neff"), collapse = ";") #Column names
-CLASSES_IN <- paste(c(rep("character", 5), rep("double", 10)), collapse=";") #Column types (CHARACTER;INTEGER;NUMERIC)
+CLASSES_IN <- paste(c(rep("character", 5), rep("numeric", 10)), collapse=";") #Column types (CHARACTER;INTEGER;NUMERIC)
 COLS_NEW   <- paste(c("SNP","EFFECT_ALLELE","OTHER_ALLELE","CHR","BP",
                       "N","BETA","SE","PVAL","EAF", 
                       "IMPUTED","IMPUTATION","HWE", "OR", "Neff"), collapse = ";") #Column names used in QC (DO NOT CHANGE)
 
 #===INPUT - Reference panel 
-REF_FILE_RSID   <- "../temp/ref/1KG_AFR_AF_MAF01_rsid.txt" #Pathname of reference panel
-REF_FILE_ALLELE <- "../temp/ref/1KG_AFR_AF_MAF01_allele.txt" #Pathname of reference panel
-REF_COLS    <- paste(c("ChrPosID","REF","ALT","AF_ALT_AFR_1000G"), collapse = ";") #Column names
-REF_CLASSES <- paste(c(rep("character", 3), "double"), collapse=";") #Column types (CHARACTER;INTEGER;NUMERIC)
+REF_FILE_RSID   <- glue("../temp/ref/1KG_{ANCEST}_AF_maf{MAF}_rsid.txt"  ) #Pathname of reference panel
+REF_FILE_ALLELE <- glue("../temp/ref/1KG_{ANCEST}_AF_maf{MAF}_allele.txt") #Pathname of reference panel
+REF_COLS    <- paste(c("ChrPosID","REF","ALT",glue("AF_ALT_{ANCEST}_1000G")), collapse = ";") #Column names
+REF_CLASSES <- paste(c(rep("character", 3), "numeric"), collapse=";") #Column types (CHARACTER;INTEGER;NUMERIC)
 REF_MARKER  <- "ChrPosID"
 REF_RSID    <- "RSID" #Column name of RSID column
 REF_CHR     <- "Chr" #Column name of chromosome column
 REF_POS     <- "Pos" #Column name of position column
-REF_AF      <- "AF_ALT_AFR_1000G" #Column name of allele freq
+REF_AF      <- glue("AF_ALT_{ANCEST}_1000G") #Column name of allele freq
 
 #===OUTPUT
+PATH_OUT    <- glue("../output/{ANCEST}/{PHENO}") # Destination
 COLS_OUT    <- paste(c("SNP","cptid","Chr","position","EFFECT_ALLELE",
                        "OTHER_ALLELE","EAF",
                        "IMPUTED","IMPUTATION","BETA",
                        "SE","Z","PVAL","N","HWE",
                        "OR","Neff"), collapse = ";") 
-PATH_OUT    <- "../temp/AFR/ALCP" # Destination
 
 
-#=====BINARY TRAITS ONLY===================================================
+#=Generate ECF File============================================================
 
 ecf_file_binary <- glue(
   "#################################################################################################################
@@ -67,7 +81,7 @@ DEFINE		--pathOut {PATH_OUT}
 ### Please define here the input files of the study:
 EASYIN	--fileIn {FILE_IN}
 	--fileInShortName {FILE_NAME}
-	--astrSetNumCol MAF_THRESHOLD=0.005;INFO_THRESHOLD=0.9;SDY=1
+	--astrSetNumCol MAF_THRESHOLD=0.{MAF};INFO_THRESHOLD=0.9;SDY=1
 
 ##############################################################
 ## 0. Start EasyQC scripting interface                      ##
@@ -345,8 +359,8 @@ EVALSTAT      --colStat IMPUTATION
 
 STOP EASYQC")
 
-#Write text to .ecf file
-system("mkdir -p ../temp/ecf_files")
+#=Write text to .ecf file======================================================
+system(glue("mkdir -p {PATH_OUT}"))
 sink(glue("../temp/ecf_files/easyqc_ext2.0_{FILE_NAME}.ecf"))
 cat(ecf_file_binary)
 sink()
