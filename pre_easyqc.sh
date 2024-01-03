@@ -102,9 +102,12 @@ awk -F"\t" 'NR==1 {print} NR>1 && ($6 != "D" && $6 != "I") &&
 #=SAMP_PREV: 12594/54757=.23
 #=Neff=4*.23*(1-.23)*(54757)=38789.86
 
+#CHANGED LAST TO COLUMNS TO ("NA", 1)
+#THIS IGNORES THE "IMPFIX" FILE MODIFICATIONS
+
 awk -F"\t" '{if(NR == 1) {print "ChrPosID", "Chr", "rsID", "position", "coded_all", "noncoded_all",
 	"AF_coded_all", "oevar_imp", "OR", "Beta", "SE", "Z", "Pval", "N", "Neff", "HWE_pval", "imputed"} \
-	else {print $2":"$3, $2, $1, $3, $5, $6, $7, "NA", exp($8), $8, $9, $8/$9, $10, $11, "38789.86", $14, $12}}' OFS="\t" \
+	else {print $2":"$3, $2, $1, $3, $5, $6, $7, "NA", exp($8), $8, $9, $8/$9, $10, $11, "38789.86", "NA", 0}}' OFS="\t" \
 	"$AFR_SMOK_23F_PRE/afr_smok_23f_impfix_rsid_snps.txt" > "$AFR_SMOK_23F_PRE/afr_smok_23f_PRE_EASYQC.txt"
 
 fi
@@ -145,7 +148,7 @@ awk -F"\t" 'NR==1 {print} NR>1 && ($6 != "D" && $6 != "I") &&
 
 awk -F"\t" '{if(NR == 1) {print "ChrPosID", "Chr", "rsID", "position", "coded_all", "noncoded_all",
 	"AF_coded_all", "oevar_imp", "OR", "Beta", "SE", "Z", "Pval", "N", "Neff", "HWE_pval", "imputed"} \
-        else {print $2":"$3, $2, $1, $3, $5, $6, $7, "NA", exp($8), $8, $9, $8/$9, $10, $11, "33400.27", $14, $12}}' OFS="\t" \
+        else {print $2":"$3, $2, $1, $3, $5, $6, $7, "NA", exp($8), $8, $9, $8/$9, $10, $11, "33400.27", "NA", 0}}' OFS="\t" \
         "$AFR_SMOK_23M_PRE/afr_smok_23m_impfix_rsid_snps.txt" > "$AFR_SMOK_23M_PRE/afr_smok_23m_PRE_EASYQC.txt"
 fi
 
@@ -218,7 +221,7 @@ awk -F"\t" 'BEGIN {OFS="\t"} {
 
 awk -F"\t" '{if(NR == 1) {print "ChrPosID", "Chr", "rsID", "position", "coded_all", "noncoded_all",
 	"AF_coded_all", "oevar_imp", "OR", "Beta", "SE", "Z", "Pval", "N", "Neff", "HWE_pval", "imputed"} \
-        else {print $1":"$2, $1, $3, $2, $4, $5, $13, "NA", exp($7), $7, $8, $7/$8, $9, $10, "22109.62", "NA", "0"}}' OFS="\t" \
+        else {print $1":"$2, $1, $3, $2, $4, $5, $13, "NA", exp($7), $7, $8, $7/$8, $9, $10, "22109.62", "NA", 0}}' OFS="\t" \
         "$AFR_SMOK_PUB_PRE/afr_smok_pub_hg19_rsid_snps_af_aligned.txt" > "$AFR_SMOK_PUB_PRE/afr_smok_pub_PRE_EASYQC.txt"
 
 fi
@@ -284,7 +287,7 @@ awk -F"\t" 'BEGIN {OFS="\t"} {
 
 awk -F"\t" 'BEGIN {OFS="\t"} NR==1 {print "ChrPosID", "Chr", "rsID", "position", "coded_all", "noncoded_all",
 	"AF_coded_all", "oevar_imp", "OR", "Beta", "SE","Z","Pval", "N", "Neff", "HWE_pval", "imputed"}
-	NR>1 {print $1 ":" $3, $1, $2, $3, $4, $5, $17, $8, $9, log($9), $10,log($9)/$10,$11, "225534", "103135.53", "NA", "1"}' \
+	NR>1 {print $1 ":" $3, $1, $2, $3, $4, $5, $17, $8, $9, log($9), $10,log($9)/$10,$11, "225534", "103135.53", "NA", 1}' \
 	"$EUR_ADHD_PRE/eur_adhd_tab_rsid_snps_af_aligned.txt" > "$EUR_ADHD_PRE/eur_adhd_PRE_EASYQC.txt"
 fi
 
@@ -367,7 +370,7 @@ awk -F"\t" 'NR==1 {print} NR>1 && ($6 != "D" && $6 != "I") &&
 
 awk -F"\t" '{if(NR == 1) {print "ChrPosID", "Chr", "rsID", "position", "coded_all", "noncoded_all",
 	"AF_coded_all", "oevar_imp", "OR", "Beta", "SE", "Z", "Pval", "N", "Neff", "HWE_pval", "imputed"} \
-        else {print $2":"$3, $2, $1, $3, $5, $6, $7, "NA", exp($8), $8, $9, $8/$9, $10, $11, "965041.67", $14, $12}}' OFS="\t" \
+        else {print $2":"$3, $2, $1, $3, $5, $6, $7, "NA", exp($8), $8, $9, $8/$9, $10, $11, "965041.67", "NA", 0}}' OFS="\t" \
         "$EUR_SMOK_23F_PRE/eur_smok_23f_impfix_rsid_snps.txt" > "$EUR_SMOK_23F_PRE/eur_smok_23f_PRE_EASYQC.txt"
 
 fi
@@ -405,7 +408,7 @@ awk -F"\t" 'NR==1 {print} NR>1 && ($6 != "D" && $6 != "I") &&
 
 awk -F"\t" '{if(NR == 1) {print "ChrPosID", "Chr", "rsID", "position", "coded_all", "noncoded_all",
 	"AF_coded_all", "oevar_imp", "OR", "Beta", "SE", "Z", "Pval", "N", "Neff", "HWE_pval", "imputed"} \
-        else {print $2":"$3, $2, $1, $3, $5, $6, $7, "NA", exp($8), $8, $9, $8/$9, $10, $11, "849263.66", $14, $12}}' OFS="\t" \
+        else {print $2":"$3, $2, $1, $3, $5, $6, $7, "NA", exp($8), $8, $9, $8/$9, $10, $11, "849263.66", "NA", 0}}' OFS="\t" \
         "$EUR_SMOK_23M_PRE/eur_smok_23m_impfix_rsid_snps.txt" > "$EUR_SMOK_23M_PRE/eur_smok_23m_PRE_EASYQC.txt"
 
 fi
@@ -474,7 +477,7 @@ awk -F"\t" 'BEGIN {OFS="\t"} {
 
 awk -F"\t" '{if(NR == 1) {print "ChrPosID", "Chr", "rsID", "position", "coded_all", "noncoded_all",
         "AF_coded_all", "oevar_imp", "OR", "Beta", "SE", "Z", "Pval", "N", "Neff", "HWE_pval", "imputed"} \
-        else {print $1":"$2, $1, $3, $2, $4, $5, $13, "NA", exp($7), $7, $8, $7/$8, $9, $10, "783473.64", "NA", "0"}}' OFS="\t" \
+        else {print $1":"$2, $1, $3, $2, $4, $5, $13, "NA", exp($7), $7, $8, $7/$8, $9, $10, "783473.64", "NA", 0}}' OFS="\t" \
         "$EUR_SMOK_PUB_PRE/eur_smok_pub_hg19_rsid_snps_af_aligned.txt" > "$EUR_SMOK_PUB_PRE/eur_smok_pub_PRE_EASYQC.txt"
 
 fi
