@@ -477,7 +477,43 @@ awk -F"\t" 'BEGIN {OFS="\t"} {
 
 awk -F"\t" '{if(NR == 1) {print "ChrPosID", "Chr", "rsID", "position", "coded_all", "noncoded_all",
         "AF_coded_all", "oevar_imp", "OR", "Beta", "SE", "Z", "Pval", "N", "Neff", "HWE_pval", "imputed"} \
-        else {print $1":"$2, $1, $3, $2, $4, $5, $13, "NA", exp($7), $7, $8, $7/$8, $9, $10, "783473.64", "NA", 0}}' OFS="\t" \
+        else {print $1":"$2, $1, $3, $2, $4, $5, $13, "NA", exp($7), $7, $8, $7/$8, $9, $10, "339759.6", "NA", 0}}' OFS="\t" \
         "$EUR_SMOK_PUB_PRE/eur_smok_pub_hg19_rsid_snps_af_aligned.txt" > "$EUR_SMOK_PUB_PRE/eur_smok_pub_PRE_EASYQC.txt"
 
 fi
+
+
+
+#4-UKB (no sibs)
+
+
+EUR_SMOK_UKB_RAW="../input/EUR/SMOK/CLEANED.UKB_J_SMOKE_EVER"
+EUR_SMOK_UKB_PRE="../temp/EUR/SMOK"
+mkdir -p "$EUR_SMOK_UKB_PRE"
+
+if [ ! -f "$EUR_SMOK_UKB_PRE/eur_smok_ukb_PRE_EASYQC.txt" ]; then
+
+#head -n2 CLEANED.UKB_J_SMOKE_EVER
+#SNP	cptid	Chr	position	EFFECT_ALLELE	OTHER_ALLELE	EAF	IMPUTED	IMPUTATION	BETA	SE	Z	PVAL	N	HWE
+#rs113190524	10:62093307	10	62093307	C	T	0.719095	1	0.994363	0.000752903	0.00120016	0.627335521930409	0.53	403349	NA
+
+# REMOVE NON-SNPs, SNPS NOT INCLUDED IN GWAS, AND X-CHR ##
+awk -F"\t" 'NR==1 {print} NR>1 && ($5 != "D" && $5 != "I") &&
+        substr($1, 1, 2) == "rs" && ($13 != "" && $13 != "NA") &&
+        ($3 != "X") {print}' OFS="\t" \
+        "$EUR_SMOK_UKB_RAW" > "$EUR_SMOK_UKB_PRE/eur_smok_ukb_rsid_snps.txt"
+
+#NOTES
+#Calculate Neff (prev from GSCAN2 article based on full UKB):
+#=N_CAS: 403349*.45=181507
+#=N_CON: 403349-181507=221842
+#=SAMP_PREV: 181507/403349=.45
+#=Neff=4*.45*(1-.45)*(403349)=399315.51
+
+awk -F"\t" '{if(NR == 1) {print "ChrPosID", "Chr", "rsID", "position", "coded_all", "noncoded_all",
+        "AF_coded_all", "oevar_imp", "OR", "Beta", "SE", "Z", "Pval", "N", "Neff", "HWE_pval", "imputed"} \
+        else {print $2, $3, $1, $4, $5, $6, $7, $9, exp($10), $10, $11, $12, $13, $14, "399315.51", $15, $8}}' OFS="\t" \
+        "$EUR_SMOK_UKB_PRE/eur_smok_ukb_rsid_snps.txt" > "$EUR_SMOK_UKB_PRE/eur_smok_ukb_PRE_EASYQC.txt"
+
+fi
+
