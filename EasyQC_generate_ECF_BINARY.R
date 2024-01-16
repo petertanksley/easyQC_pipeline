@@ -12,8 +12,8 @@ p_load(glue,
 
 #=EDIT THESE STRINGS===========================================================
 ANCEST      <- "EUR" #ALL CAPS
-PHENO       <- "ADHD" #ALL CAPS
-VERSION     <- "" #Specific version (if multiple versions exist)
+PHENO       <- "SMOK" #ALL CAPS
+VERSION     <- "UKB" #Specific version (leave blank if only one version exists)
 MAF         <- "005" #MAF filter level ("001" for AFR; "005" for EUR)
 
 #=DO NOT EDIT THESE============================================================

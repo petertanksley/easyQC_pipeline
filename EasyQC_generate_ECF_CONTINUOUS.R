@@ -1,7 +1,7 @@
 
-#================================================================================================#
-# This script create .ecf files for the software EasyQC. This script is for: CONTINUOUS TRAITS 
-#================================================================================================#
+#=============================================================================#
+# This script create .ecf files for the software EasyQC. (CONTINUOUS TRAITS ONLY) 
+#=============================================================================#
 
 #=====SETUP====================================================================
 
@@ -10,38 +10,54 @@ library(pacman)
 p_load(glue,
        rio)
 
+#=EDIT THESE STRINGS===========================================================
+ANCEST      <- "EUR" #ALL CAPS
+PHENO       <- "ALCP" #ALL CAPS
+VERSION     <- "UKB" #Specific version (leave blank if only one version exists)
+MAF         <- "005" #MAF filter level ("001" for AFR; "005" for EUR)
+
+#=DO NOT EDIT THESE============================================================
 
 #===INPUT - Sumstats
-FILE_IN        <- "" #Pathname of file
-FILE_NAME      <- "" #(nick)Name of file
-COLS_IN    <- paste(c("rsID","coded_all","noncoded_all","Chr","position",
-                      "N","Beta","SE","Pval","AF_coded_all",
-                      "imputed","oevar_imp","HWE_pval", "OR", "Neff"), collapse = ";") #Column names
-CLASSES_IN <- paste(c(rep("character", 5), rep("numeric", 10)), collapse=";") #Column types (CHARACTER;INTEGER;NUMERIC)
-COLS_NEW   <- paste(c("SNP","EFFECT_ALLELE","OTHER_ALLELE","CHR","BP",
-                      "N","BETA","SE","PVAL","EAF",
-                      "IMPUTED","IMPUTATION","HWE", "OR", "Neff"), collapse = ";") #Column names used in QC (DO NOT CHANGE)
+#conditional statement for file nickname
+if (VERSION != "") {
+  FILE_NAME <- tolower(glue("{ANCEST}_{PHENO}_{VERSION}"))
+} else {
+  FILE_NAME <- tolower(glue("{ANCEST}_{PHENO}"))
+}
 
-#===INPUT - Referance panel 
-REF_FILE    <- "{PATHNAME}/MAPFILE.1000G+UK10K.CEU+TSI+GBR.chr1_22_X.txt" #Pathname of reference panel
-REF_COLS    <- paste(c("ChrPosID","ALT","REF","AF_ALT_1000G+UK10K"), collapse = ";") #Column names
+FILE_IN     <- glue("../temp/{ANCEST}/{PHENO}/{FILE_NAME}_PRE_EASYQC.txt") #Pathname of file
+
+COLS_IN    <- paste(c("rsID","coded_all","noncoded_all","Chr","position",
+                      "N","Beta","SE","Pval","AF_coded_all", 
+                      "imputed","oevar_imp","HWE_pval"), collapse = ";") #Column names
+CLASSES_IN <- paste(c(rep("character", 5), rep("numeric", 8)), collapse=";") #Column types (CHARACTER;INTEGER;NUMERIC)
+COLS_NEW   <- paste(c("SNP","EFFECT_ALLELE","OTHER_ALLELE","CHR","BP",
+                      "N","BETA","SE","PVAL","EAF", 
+                      "IMPUTED","IMPUTATION","HWE"), collapse = ";") #Column names used in QC (DO NOT CHANGE)
+
+#===INPUT - Reference panel 
+REF_FILE_RSID   <- glue("../temp/ref/1KG_{ANCEST}_AF_maf{MAF}_rsid.txt"  ) #Pathname of reference panel
+REF_FILE_ALLELE <- glue("../temp/ref/1KG_{ANCEST}_AF_maf{MAF}_allele.txt") #Pathname of reference panel
+REF_COLS    <- paste(c("ChrPosID","REF","ALT",glue("AF_ALT_{ANCEST}_1000G")), collapse = ";") #Column names
 REF_CLASSES <- paste(c(rep("character", 3), "numeric"), collapse=";") #Column types (CHARACTER;INTEGER;NUMERIC)
 REF_MARKER  <- "ChrPosID"
-# REF_RSID    <- "" #Column name of RSID column
+REF_RSID    <- "RSID" #Column name of RSID column
 REF_CHR     <- "Chr" #Column name of chromosome column
 REF_POS     <- "Pos" #Column name of position column
+REF_AF      <- glue("AF_ALT_{ANCEST}_1000G") #Column name of allele freq
 
 #===OUTPUT
+PATH_OUT    <- glue("../output/{ANCEST}/{PHENO}") # Destination
 COLS_OUT    <- paste(c("SNP","cptid","Chr","position","EFFECT_ALLELE",
-                       "OTHER_ALLELE","EAF","IMPUTED","IMPUTATION","BETA",
-                       "SE","Z","PVAL","N","HWE",
-                       "OR","Neff"), collapse = ";") 
-PATH_OUT    <- "" # Destination
+                       "OTHER_ALLELE","EAF",
+                       "IMPUTED","IMPUTATION","BETA",
+                       "SE","Z","PVAL","N","HWE"), collapse = ";") 
 
 
-#=====CONTINUOUS TRAITS ONLY===================================================
+#=Generate ECF File============================================================
 
-ecf_file_continuous <- glue(
+ecf_file_binary <- glue(
   "#################################################################################################################
 ##### EasyQC-script to perform study-level and meta-level QC on imputed 1000G data
 ##### EasyQC version: 9.0
@@ -64,7 +80,7 @@ DEFINE		--pathOut {PATH_OUT}
 ### Please define here the input files of the study:
 EASYIN	--fileIn {FILE_IN}
 	--fileInShortName {FILE_NAME}
-	--astrSetNumCol MAF_THRESHOLD=0.005;INFO_THRESHOLD=0.9;SDY=1
+	--astrSetNumCol MAF_THRESHOLD=0.{MAF};INFO_THRESHOLD=0.9;SDY=1
 
 ##############################################################
 ## 0. Start EasyQC scripting interface                      ##
@@ -137,8 +153,8 @@ CREATECPTID
 		--colInA2 OTHER_ALLELE
 		--colInChr CHR
 		--colInPos BP
-		--fileMap {REF_FILE}
-		--colMapMarker rsmid
+		--fileMap {REF_FILE_RSID}
+		--colMapMarker {REF_RSID}
 		--colMapChr {REF_CHR}
 		--colMapPos {REF_POS}
 		--blnUseInMarker 0
@@ -171,7 +187,7 @@ CLEANDUPLICATES	--colInMarker cptid
 
 ## Merge with file containing AFs for 1kG
 MERGE 		--colInMarker cptid
-		--fileRef {REF_FILE}
+		--fileRef {REF_FILE_ALLELE}
 		--acolIn {REF_COLS}
 		--acolInClasses {REF_CLASSES}
 		--strRefSuffix .ref
@@ -181,7 +197,7 @@ MERGE 		--colInMarker cptid
 		--blnRefAll 0
 
 ## Create column with expected allele frequency, given imputation ref. sample
-ADDCOL --rcdAddCol freq1.ref --colOut EAF.ref
+ADDCOL --rcdAddCol {REF_AF}.ref --colOut EAF.ref
 
 ## Adjust alleles to all be on the forward strand and to match the reference sample
 ## (this automatically adjust EAF s.t. the frequency corresponds to A1 in the reference sample)
@@ -191,8 +207,8 @@ ADJUSTALLELES
 			--colInA2 OTHER_ALLELE
 			--colInFreq EAF
 			--colInBeta BETA
-			--colRefA1 a1.ref
-			--colRefA2 a2.ref
+			--colRefA1 ALT.ref
+			--colRefA2 REF.ref
 			--blnRemoveMismatch 1
 			--blnRemoveInvalid 1
 			--blnWriteInvalid 1
@@ -342,7 +358,9 @@ EVALSTAT      --colStat IMPUTATION
 
 STOP EASYQC")
 
-#Write text to .ecf file
-sink(glue("easyqc_ext2.0_{FILE_NAME}.ecf"))
-cat(ecf_file_continuous)
+#=Write text to .ecf file======================================================
+system(glue("mkdir -p {PATH_OUT}"))
+sink(glue("../temp/ecf_files/easyqc_ext2.0_{FILE_NAME}.ecf"))
+cat(ecf_file_binary)
 sink()
+

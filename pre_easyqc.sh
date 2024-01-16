@@ -326,6 +326,34 @@ awk -F"\t" '{if(NR == 1) {print "ChrPosID", "Chr", "rsID", "position", "coded_al
 	"$EUR_ALCP_PRE/eur_alcp_rsid_snps.txt" > "$EUR_ALCP_PRE/eur_alcp_PRE_EASYQC.txt"
 fi
 
+
+#========================================ALCP (UKB - no sibs)
+
+#head -n2 ../input/EUR/ALCP/CLEANED.UKB_L_AUDIT_P_log10
+#SNP    cptid   Chr     position        EFFECT_ALLELE   OTHER_ALLELE    EAF     IMPUTED IMPUTATION      BETA    SE      Z       PVAL    N       HWE
+#rs113190524    10:62093307     10      62093307        C       T       0.719602        1       0.994363        0.000261662     0.00111148      0.235417641343074       0.81    130999  NA
+
+#assign variables
+EUR_ALCP_UKB_RAW="../input/EUR/ALCP/CLEANED.UKB_L_AUDIT_P_log10"
+EUR_ALCP_UKB_PRE="../temp/EUR/ALCP"
+mkdir -p "$EUR_ALCP_UKB_PRE"
+
+if [ ! -f "$EUR_ALCP_UKB_PRE/eur_alcp_ukb_PRE_EASYQC.txt" ]; then
+
+## REMOVE NON-SNPs, SNPS NOT INCLUDED IN GWAS, AND X-CHR ##
+awk -F"\t" 'NR==1 {print} NR>1 && ($5 != "D" && $5 != "I") && \
+        substr($1, 1, 2) == "rs" && ($13 != "" && $13 != "NA") && \
+        ($2 != "X") {print}' OFS="\t" \
+        "$EUR_ALCP_RAW" > "$EUR_ALCP_PRE/eur_alcp_rsid_snps.txt"
+
+#=NOTES
+
+## ADD FINAL HEADERS AND MAKE ADJUSTMENTS TO FIT STRUCTURE ##
+awk -F"\t" '{if(NR == 1) {print "ChrPosID", "Chr", "rsID", "position", "coded_all", "noncoded_all",
+        "AF_coded_all", "oevar_imp", "OR", "Beta", "SE", "Z", "Pval", "N", "Neff", "HWE_pval", "imputed"} \
+        else {print $2, $3, $1, $4, $5, $6, $7, $9, exp($10), $10, $11, $12, $13, $14, "399315.51", $15, $8}}' OFS="\t" \
+        "$EUR_ALCP_UKB_PRE/eur_alcp_ukb_rsid_snps.txt" > "$EUR_ALCP_UKB_PRE/eur_alcp_ukb_PRE_EASYQC.txt"
+
 #======================================CUD (Johnson et al., 2020)
 
 #head -n2 ../input/EUR/CUD/CUD_EUR_full_noAddHealth.chrbp.short

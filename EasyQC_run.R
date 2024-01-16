@@ -12,17 +12,28 @@ p_load(EasyQC,
        forestplot,
        plotrix)
 
-#AFR 
+#=AFR==========================================================================
+
+#ALC
 EasyQC("../temp/ecf_files/easyqc_ext2.0_afr_alcp.ecf")
+
+#SMOK
 EasyQC("../temp/ecf_files/easyqc_ext2.0_afr_smok_23f.ecf")
 EasyQC("../temp/ecf_files/easyqc_ext2.0_afr_smok_23m.ecf")
 EasyQC("../temp/ecf_files/easyqc_ext2.0_afr_smok_pub.ecf")
 
-#EUR
+#=EUR==========================================================================
+
+#ADHD
 EasyQC("../temp/ecf_files/easyqc_ext2.0_eur_adhd.ecf")
+
+#ALCP
 EasyQC("../temp/ecf_files/easyqc_ext2.0_eur_alcp.ecf")
+
+#SMOK
 EasyQC("../temp/ecf_files/easyqc_ext2.0_eur_smok_23f.ecf")
 EasyQC("../temp/ecf_files/easyqc_ext2.0_eur_smok_23m.ecf")
 EasyQC("../temp/ecf_files/easyqc_ext2.0_eur_smok_pub.ecf")
+EasyQC("../temp/ecf_files/easyqc_ext2.0_eur_smok_ukb.ecf")
 
 
