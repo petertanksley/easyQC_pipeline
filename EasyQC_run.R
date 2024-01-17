@@ -29,6 +29,7 @@ EasyQC("../temp/ecf_files/easyqc_ext2.0_eur_adhd.ecf")
 
 #ALCP
 EasyQC("../temp/ecf_files/easyqc_ext2.0_eur_alcp.ecf")
+EasyQC("../temp/ecf_files/easyqc_ext2.0_eur_alcp_ukb.ecf")
 
 #SMOK
 EasyQC("../temp/ecf_files/easyqc_ext2.0_eur_smok_23f.ecf")

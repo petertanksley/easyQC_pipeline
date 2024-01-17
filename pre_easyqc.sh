@@ -2,7 +2,7 @@
 #SBATCH -J tt_pgs         # Job name
 #SBATCH -o tt_pgs.o%j     # Name of stdout output file
 #SBATCH -N 1		  # Total # of nodes (must be 1 for serial)
-#SBATCH -n 24		  # Total # of mpi tasks (should be 1 for serial)
+#SBATCH -n 1		  # Total # of mpi tasks (should be 1 for serial)
 #SBATCH -p normal   	  # Queue (partition) name
 #SBATCH -t 00:30:00	  # Run time (hh:mm:ss)
 #SBATCH -A OTH21060	  # Project/Allocation name (req'd if you have more than 1)
