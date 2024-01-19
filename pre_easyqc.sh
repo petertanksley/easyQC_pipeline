@@ -291,39 +291,40 @@ awk -F"\t" 'BEGIN {OFS="\t"} NR==1 {print "ChrPosID", "Chr", "rsID", "position",
 	"$EUR_ADHD_PRE/eur_adhd_tab_rsid_snps_af_aligned.txt" > "$EUR_ADHD_PRE/eur_adhd_PRE_EASYQC.txt"
 fi
 
-#========================================ALCP (Zhou et al., 2023)
+#========================================ALCP (Zhou et al., 2023 - NO UKB)
 
-#head -n2 ../input/EUR/ALCP/PAU_EUR_Aug2023.txt
+#head -n2 ../input/EUR/ALCP/AUD_EUR_Aug2023.txt
 #SNP_ID	Chrosome	Position	Allele1	Allele2	EA	EAF	SampleSize	Effect	SE	PValue	Direction
-#rs144155419	1	717587	A	G	A	0.0100	183925.9	-0.0171839676620293	0.0165708463471835	0.2996	?-+-???????
+#rs3094315	1	752566	A	G	A	0.8067	54288.1	0.0016830792606942	0.00768529342782739	0.8264	?+-?????+
 
 #assign variables
-EUR_ALCP_RAW="../input/EUR/ALCP/PAU_EUR_Aug2023.txt"
+EUR_ALCP_RAW="../input/EUR/ALCP/AUD_EUR_Aug2023.txt"
 EUR_ALCP_PRE="../temp/EUR/ALCP"
 mkdir -p "$EUR_ALCP_PRE"
 
-if [ ! -f "$EUR_ALCP_PRE/eur_alcp_PRE_EASYQC.txt" ]; then
+if [ ! -f "$EUR_ALCP_PRE/eur_alcp_noukb_PRE_EASYQC.txt" ]; then
 
 ## REMOVE NON-SNPs, SNPS NOT INCLUDED IN GWAS, AND X-CHR ##
 awk -F"\t" 'NR==1 {print} NR>1 && ($4 != "D" && $4 != "I") && \
 	substr($1, 1, 2) == "rs" && ($11 != "" && $11 != "NA") && \
 	($2 != "X") {print}' OFS="\t" \
-	"$EUR_ALCP_RAW" > "$EUR_ALCP_PRE/eur_alcp_rsid_snps.txt"
+	"$EUR_ALCP_RAW" > "$EUR_ALCP_PRE/eur_alcp_noukb_rsid_snps.txt"
 
 #=NOTES
 #combine chr and pos to form ChrPosID
 #set oever_imp (INFO) to "NA"
 #exponentiate beta to get OR
 #divide beta by SE to get Z
-#set N to "359398.05" (max sample size)
+#set N to "753248" (max sample size)
+#set Neff to "359358"
 #set HWE_pval to "NA" (no data)
 #set imputed to "0" (default to assuming no imputation)
 
 ## ADD FINAL HEADERS AND MAKE ADJUSTMENTS TO FIT STRUCTURE ##
 awk -F"\t" '{if(NR == 1) {print "ChrPosID", "Chr", "rsID", "position", "coded_all", "noncoded_all", \
 	"AF_coded_all", "oevar_imp", "OR", "Beta", "SE", "Z", "Pval", "N", "Neff", "HWE_pval", "imputed"} \
-	else {print $2":"$3, $2, $1, $3, $4, $5, $7, "NA", exp($9), $9, $10, $9/$10, $11, "903147", "359398.05", "NA", 0}}' OFS="\t" \
-	"$EUR_ALCP_PRE/eur_alcp_rsid_snps.txt" > "$EUR_ALCP_PRE/eur_alcp_PRE_EASYQC.txt"
+	else {print $2":"$3, $2, $1, $3, $4, $5, $7, "NA", exp($9), $9, $10, $9/$10, $11, "753248", "359398.05", "NA", 0}}' OFS="\t" \
+	"$EUR_ALCP_PRE/eur_alcp_noukb_rsid_snps.txt" > "$EUR_ALCP_PRE/eur_alcp_noukb_PRE_EASYQC.txt"
 fi
 
 
