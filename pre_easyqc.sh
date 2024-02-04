@@ -56,7 +56,7 @@ awk -F"\t" 'NR==1 {print} NR>1 && ($4 != "D" && $4 != "I") &&
 ## ADD FINAL HEADERS AND MAKE ADJUSTMENTS TO FIT STRUCTURE ##
 awk -F"\t" '{if(NR == 1) {print "ChrPosID", "Chr", "rsID", "position", "coded_all", "noncoded_all",
 	"AF_coded_all", "oevar_imp", "OR", "Beta", "SE", "Z", "Pval", "N", "Neff", "HWE_pval", "imputed"} \
-	else {print $2":"$3, $2, $1, $3, $4, $5, $7, "NA", exp($9), $9, $10, $9/$10, $11, "122571", $8, "NA", 0}}' OFS="\t" \
+	else {print $2":"$3, $2, $1, $3, $4, $5, $7, "NA", exp($9), $9, $10, $9/$10, $11, "122571", "106697", "NA", 0}}' OFS="\t" \
 	"$AFR_ALCP_PRE/afr_alcp_rsid_snps.txt" > "$AFR_ALCP_PRE/afr_alcp_PRE_EASYQC.txt"
 fi
 
@@ -107,7 +107,7 @@ awk -F"\t" 'NR==1 {print} NR>1 && ($6 != "D" && $6 != "I") &&
 
 awk -F"\t" '{if(NR == 1) {print "ChrPosID", "Chr", "rsID", "position", "coded_all", "noncoded_all",
 	"AF_coded_all", "oevar_imp", "OR", "Beta", "SE", "Z", "Pval", "N", "Neff", "HWE_pval", "imputed"} \
-	else {print $2":"$3, $2, $1, $3, $6, $5, $7, "NA", exp($8), $8, $9, $8/$9, $10, $11, "38789.86", "NA", 0}}' OFS="\t" \
+	else {print $2":"$3, $2, $1, $3, $6, $5, $7, "NA", exp($8), $8, $9, $8/$9, $10, "54757", "38789.86", "NA", 0}}' OFS="\t" \
 	"$AFR_SMOK_23F_PRE/afr_smok_23f_impfix_rsid_snps.txt" > "$AFR_SMOK_23F_PRE/afr_smok_23f_PRE_EASYQC.txt"
 
 fi
@@ -148,7 +148,7 @@ awk -F"\t" 'NR==1 {print} NR>1 && ($6 != "D" && $6 != "I") &&
 
 awk -F"\t" '{if(NR == 1) {print "ChrPosID", "Chr", "rsID", "position", "coded_all", "noncoded_all",
 	"AF_coded_all", "oevar_imp", "OR", "Beta", "SE", "Z", "Pval", "N", "Neff", "HWE_pval", "imputed"} \
-        else {print $2":"$3, $2, $1, $3, $6, $5, $7, "NA", exp($8), $8, $9, $8/$9, $10, $11, "33400.27", "NA", 0}}' OFS="\t" \
+        else {print $2":"$3, $2, $1, $3, $6, $5, $7, "NA", exp($8), $8, $9, $8/$9, $10, "40554", "33400.27", "NA", 0}}' OFS="\t" \
         "$AFR_SMOK_23M_PRE/afr_smok_23m_impfix_rsid_snps.txt" > "$AFR_SMOK_23M_PRE/afr_smok_23m_PRE_EASYQC.txt"
 fi
 
@@ -217,11 +217,11 @@ awk -F"\t" 'BEGIN {OFS="\t"} {
 #exponentiate beta to get OR
 #
 #Calculate Neff as sum of effective sample size (cohort-specific prev reported in supp)
-#Neff==22109.62
+#Neff==22110
 
 awk -F"\t" '{if(NR == 1) {print "ChrPosID", "Chr", "rsID", "position", "coded_all", "noncoded_all",
 	"AF_coded_all", "oevar_imp", "OR", "Beta", "SE", "Z", "Pval", "N", "Neff", "HWE_pval", "imputed"} \
-        else {print $1":"$2, $1, $3, $2, $4, $5, $13, "NA", exp($7), $7, $8, $7/$8, $9, $10, "22109.62", "NA", 0}}' OFS="\t" \
+        else {print $1":"$2, $1, $3, $2, $4, $5, $13, "NA", exp($7), $7, $8, $7/$8, $9, "24278", "22110", "NA", 0}}' OFS="\t" \
         "$AFR_SMOK_PUB_PRE/afr_smok_pub_hg19_rsid_snps_af_aligned.txt" > "$AFR_SMOK_PUB_PRE/afr_smok_pub_PRE_EASYQC.txt"
 
 fi
@@ -358,6 +358,45 @@ awk -F"\t" '{if(NR == 1) {print "ChrPosID", "Chr", "rsID", "position", "coded_al
         else {print $2, $3, $1, $4, $5, $6, $7, $9, $10, $11, $12, $13, $14, $15, $8}}' OFS="\t" \
         "$EUR_ALCP_UKB_PRE/eur_alcp_ukb_rsid_snps.txt" > "$EUR_ALCP_UKB_PRE/eur_alcp_ukb_PRE_EASYQC.txt"
 fi
+
+
+#=========================================CANN (PASMAN et al., 2018)
+
+#head -n2 ../input/EUR/CANN/EXTERNALIZING_MA_EVER_CANNABIS_STRINGER+UKB_2022_03_03.tbl
+#Unique_ID	rsID	ChrPosID	Allele1	Allele2	Freq1	FreqSE	MinFreq	MaxFreq	Weight	Zscore	P-value	Direction	HetISq	HetChiSHetDf	HetPVal
+#5:29439275:T:C	rs667647	5:29439275	t	c	0.3755	0.0002	0.3751	0.3756	164192.00	0.900	0.3683	++	0.0	0.006	1	0.9387
+
+#assign variables
+EUR_CANN_RAW="../input/EUR/CANN/EXTERNALIZING_MA_EVER_CANNABIS_STRINGER+UKB_2022_03_03.tbl"
+EUR_CANN_PRE="../temp/EUR/CANN"
+mkdir -p "$EUR_CANN_PRE"
+
+if [ ! -f "$EUR_CANN_PRE/eur_CANN_PRE_EASYQC.txt" ]; then
+
+## REMOVE NON-SNPs, SNPS NOT INCLUDED IN GWAS, AND X-CHR; MAKE ALLELES UPPERCASE ##
+
+
+
+# NEED TO FIX THE FORMATING BEFORE PROCEEDING: NEED CHR COLUMN AND ALLELES NEED TO BE UPPER CASE
+
+
+awk -F"\t" 'NR==1 {print} NR>1 && ($4 != "d" && $4 != "i") && \
+        substr($2, 1, 2) == "rs" && ($12 != "" && $12 != "NA") && \
+        ($2 != "X")  {$4=toupper($4); $5=toupper($5); print}' OFS="\t" \
+        "$EUR_CANN_RAW" > "$EUR_CANN_PRE/eur_cann_rsid_snps.txt"
+
+#=NOTES
+#=CONTINUOUS TRAIT
+#=NO Neff/OR
+
+
+## ADD FINAL HEADERS AND MAKE ADJUSTMENTS TO FIT STRUCTURE ##
+awk -F"\t" '{if(NR == 1) {print "ChrPosID", "Chr", "rsID", "position", "coded_all", "noncoded_all",
+        "AF_coded_all", "oevar_imp", "Beta", "SE", "Z", "Pval", "N", "HWE_pval", "imputed"} \
+        else {print $2, $3, $1, $4, $5, $6, $7, $9, $10, $11, $12, $13, $14, $15, $8}}' OFS="\t" \
+        "$EUR_CANN_PRE/eur_cann_rsid_snps.txt" > "$EUR_CANN_PRE/eur_cann_PRE_EASYQC.txt"
+fi
+
 
 #======================================CUD (Johnson et al., 2020)
 
