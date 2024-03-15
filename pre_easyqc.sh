@@ -36,7 +36,7 @@ AFR_ALCP_RAW="../input/AFR/ALCP/AUD_AFR_Aug2023.txt"
 AFR_ALCP_PRE="../temp/AFR/ALCP"
 mkdir -p "$AFR_ALCP_PRE"
 
-if [ ! -f "$AFR_ALCP_PRE/afr_alcp_PRE_EASYQC.txt" ]; then
+if [ ! -f "$AFR_ALCP_PRE/afr_alcp_PRE_EASYQC.txt" ] && [-f "$AFR_ALCP_RAW"]; then
 
 ## REMOVE NON-SNPs, SNPS NOT INCLUDED IN GWAS, AND X-CHR ##
 awk -F"\t" 'NR==1 {print} NR>1 && ($4 != "D" && $4 != "I") &&
@@ -78,7 +78,7 @@ AFR_SMOK_23F_RAW="../input/AFR/SMOK/GSCAN_SMOK_INI_FEMALE_AFR_23andme.txt"
 AFR_SMOK_23F_PRE="../temp/AFR/SMOK"
 mkdir -p "$AFR_SMOK_23F_PRE"
 
-if [ ! -f "$AFR_SMOK_23F_PRE/afr_smok_23f_PRE_EASYQC.txt" ]; then
+if [ ! -f "$AFR_SMOK_23F_PRE/afr_smok_23f_PRE_EASYQC.txt" ] && [-f "$AFR_SMOK_23F_RAW"]; then
 
 #Fix imputation field (currently, all rows show imputation)
 awk -F "\t" 'BEGIN {OFS=FS} NR==1 || ($13 != "NA") { $12="0"} 1' \
@@ -122,7 +122,7 @@ AFR_SMOK_23M_RAW="../input/AFR/SMOK/GSCAN_SMOK_INI_MALE_AFR_23andme.txt"
 AFR_SMOK_23M_PRE="../temp/AFR/SMOK"
 mkdir -p "$AFR_SMOK_23M_PRE"
 
-if [ ! -f "$AFR_SMOK_23M_PRE/afr_smok_23m_PRE_EASYQC.txt" ]; then
+if [ ! -f "$AFR_SMOK_23M_PRE/afr_smok_23m_PRE_EASYQC.txt" ] && [-f "$AFR_SMOK_23M_RAW"]; then
 
 #Fix imputation field (currently, all rows show imputation)
 awk -F "\t" 'BEGIN {OFS=FS} NR==1 || ($13 != "NA") { $12="0"} 1' \
@@ -162,7 +162,7 @@ AFR_SMOK_PUB_RAW="../input/AFR/SMOK/GSCAN_SmkInit_2022_GWAS_SUMMARY_STATS_AFR.tx
 AFR_SMOK_PUB_PRE="../temp/AFR/SMOK"
 mkdir -p "$AFR_SMOK_PUB_PRE"
 
-if [ ! -f "$AFR_SMOK_PUB_PRE/afr_smok_pub_PRE_EASYQC.txt" ]; then
+if [ ! -f "$AFR_SMOK_PUB_PRE/afr_smok_pub_PRE_EASYQC.txt" ] && [-f "$AFR_SMOK_PUB_RAW"]; then
 
 #prep file for liftOver (38->19)
 awk 'BEGIN {OFS="\t"} NR>1 {print $1, $2-1, $2, $0}' "$AFR_SMOK_PUB_RAW" > "$AFR_SMOK_PUB_PRE/afr_smok_pub_liftOver.bed"
@@ -242,7 +242,7 @@ EUR_ADHD_RAW="../input/EUR/ADHD/ADHD2022_iPSYCH_deCODE_PGC.meta"
 EUR_ADHD_PRE="../temp/EUR/ADHD"
 mkdir -p "$EUR_ADHD_PRE"
 
-if [ ! -f "$EUR_ADHD_PRE/eur_adhd_PRE_EASYQC.txt" ]; then
+if [ ! -f "$EUR_ADHD_PRE/eur_adhd_PRE_EASYQC.txt" ] && [-f "$EUR_ADHD_RAW"]; then
 
 #change delimiter from space to tab
 cat "$EUR_ADHD_RAW" | tr ' ' '\t' > "$EUR_ADHD_PRE/eur_adhd_tab.txt"
@@ -302,7 +302,7 @@ EUR_ALCP_RAW="../input/EUR/ALCP/AUD_EUR_Aug2023.txt"
 EUR_ALCP_PRE="../temp/EUR/ALCP"
 mkdir -p "$EUR_ALCP_PRE"
 
-if [ ! -f "$EUR_ALCP_PRE/eur_alcp_noukb_PRE_EASYQC.txt" ]; then
+if [ ! -f "$EUR_ALCP_PRE/eur_alcp_noukb_PRE_EASYQC.txt" ] && [-f "$EUR_ALCP_RAW"]; then
 
 ## REMOVE NON-SNPs, SNPS NOT INCLUDED IN GWAS, AND X-CHR ##
 awk -F"\t" 'NR==1 {print} NR>1 && ($4 != "D" && $4 != "I") && \
@@ -339,7 +339,7 @@ EUR_ALCP_UKB_RAW="../input/EUR/ALCP/CLEANED.UKB_L_AUDIT_P_log10"
 EUR_ALCP_UKB_PRE="../temp/EUR/ALCP"
 mkdir -p "$EUR_ALCP_UKB_PRE"
 
-if [ ! -f "$EUR_ALCP_UKB_PRE/eur_alcp_ukb_PRE_EASYQC.txt" ]; then
+if [ ! -f "$EUR_ALCP_UKB_PRE/eur_alcp_ukb_PRE_EASYQC.txt" ] && [-f "$EUR_ALCP_UKB_RAW"]; then
 
 ## REMOVE NON-SNPs, SNPS NOT INCLUDED IN GWAS, AND X-CHR ##
 awk -F"\t" 'NR==1 {print} NR>1 && ($5 != "D" && $5 != "I") && \
@@ -371,7 +371,7 @@ EUR_CANN_RAW="../input/EUR/CANN/EXTERNALIZING_MA_EVER_CANNABIS_STRINGER+UKB_2022
 EUR_CANN_PRE="../temp/EUR/CANN"
 mkdir -p "$EUR_CANN_PRE"
 
-if [ ! -f "$EUR_CANN_PRE/eur_CANN_PRE_EASYQC.txt" ]; then
+if [ ! -f "$EUR_CANN_PRE/eur_CANN_PRE_EASYQC.txt" ] && [-f "$EUR_CANN_RAW"]; then
 
 ## REMOVE NON-SNPs, SNPS NOT INCLUDED IN GWAS, AND X-CHR; MAKE ALLELES UPPERCASE ##
 
@@ -416,7 +416,7 @@ EUR_SMOK_23F_RAW="../input/EUR/SMOK/GSCAN_SMOK_INI_FEMALE_EUR_23andme.txt"
 EUR_SMOK_23F_PRE="../temp/EUR/SMOK"
 mkdir -p "$EUR_SMOK_23F_PRE"
 
-if [ ! -f "$EUR_SMOK_23F_PRE/eur_smok_23f_PRE_EASYQC.txt" ]; then
+if [ ! -f "$EUR_SMOK_23F_PRE/eur_smok_23f_PRE_EASYQC.txt" ] && [-f "$EUR_SMOK_23F_RAW"]; then
 
 #Fix imputation field (currently, all rows show imputation)
 awk -F "\t" 'BEGIN {OFS=FS} NR==1 || ($13 != "NA") { $12="0"} 1' \
@@ -454,7 +454,7 @@ EUR_SMOK_23M_RAW="../input/EUR/SMOK/GSCAN_SMOK_INI_MALE_EUR_23andme.txt"
 EUR_SMOK_23M_PRE="../temp/EUR/SMOK"
 mkdir -p "$EUR_SMOK_23M_PRE"
 
-if [ ! -f "$EUR_SMOK_23M_PRE/eur_smok_23m_PRE_EASYQC.txt" ]; then
+if [ ! -f "$EUR_SMOK_23M_PRE/eur_smok_23m_PRE_EASYQC.txt" ] && [-f "$EUR_SMOK_23M_RAW"]; then
 
 #Fix imputation field (currently, all rows show imputation)
 awk -F "\t" 'BEGIN {OFS=FS} NR==1 || ($13 != "NA") { $12="0"} 1' \
@@ -495,7 +495,7 @@ EUR_SMOK_PUB_RAW="../input/EUR/SMOK/GSCAN_SmkInit_2022_GWAS_SUMMARY_STATS_EUR_wi
 EUR_SMOK_PUB_PRE="../temp/EUR/SMOK"
 mkdir -p "$EUR_SMOK_PUB_PRE"
 
-if [ ! -f "$EUR_SMOK_PUB_PRE/eur_smok_pub_PRE_EASYQC.txt" ]; then
+if [ ! -f "$EUR_SMOK_PUB_PRE/eur_smok_pub_PRE_EASYQC.txt" ] && [-f "$EUR_SMOK_PUB_RAW"]; then
 
 #prep file for liftOver (38->19)
 awk 'BEGIN {OFS="\t"} NR>1 {print $1, $2-1, $2, $0}' "$EUR_SMOK_PUB_RAW" > "$EUR_SMOK_PUB_PRE/eur_smok_pub_liftOver.bed"
@@ -563,7 +563,7 @@ EUR_SMOK_UKB_RAW="../input/EUR/SMOK/CLEANED.UKB_J_SMOKE_EVER"
 EUR_SMOK_UKB_PRE="../temp/EUR/SMOK"
 mkdir -p "$EUR_SMOK_UKB_PRE"
 
-if [ ! -f "$EUR_SMOK_UKB_PRE/eur_smok_ukb_PRE_EASYQC.txt" ]; then
+if [ ! -f "$EUR_SMOK_UKB_PRE/eur_smok_ukb_PRE_EASYQC.txt" ] && [-f "$EUR_SMOK_UKB_RAW"]; then
 
 #head -n2 CLEANED.UKB_J_SMOKE_EVER
 #SNP	cptid	Chr	position	EFFECT_ALLELE	OTHER_ALLELE	EAF	IMPUTED	IMPUTATION	BETA	SE	Z	PVAL	N	HWE

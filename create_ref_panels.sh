@@ -21,6 +21,7 @@ export PATH=$PATH:/work/07624/tankslpr/ls6/TOOLS
 #========================================================================================#
 
 #set path variables to ref panel files (downloaded from Plink2 website)
+#includes list of individuals who surpass 2d king relatedness cutoff (to be removed)
 PGEN_RAW="../input/ref/1kg_pgen/all_phase3"
 PSAM_RAW="../input/ref/1kg_pgen/all_phase3.psam"
 REL_IDS="../input/ref/1kg_pgen/deg2_phase3.king.cutoff.out.id"
